@@ -75,12 +75,12 @@ jobs:
       - name: Baixar todos os instaladores compilados
         uses: actions/download-artifact@v4
         with:
-          path: release-artifacts
+          pattern: 'Instaladores-*'
+          path: final-release
+          merge-multiple: true
 
-      - name: Organizar Arquivos para Release
+      - name: Listar Arquivos para Release
         run: |
-          mkdir -p final-release
-          find release-artifacts -type f \( -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.dmg" -o -name "*.zip" \) -exec cp {} final-release/ \;
           ls -la final-release/
 
       - name: Criar ou Atualizar GitHub Release
@@ -91,6 +91,11 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-          files: final-release/*
+          files: |
+            final-release/*.exe
+            final-release/*.AppImage
+            final-release/*.deb
+            final-release/*.dmg
+            final-release/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

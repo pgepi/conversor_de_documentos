@@ -75,6 +75,9 @@
       "shortcutName": "Conversor de Documentos",
       "artifactName": "Conversor-de-Documentos-Setup-${version}.${ext}"
     },
+    "portable": {
+      "artifactName": "Conversor-de-Documentos-Portable-${version}.${ext}"
+    },
     "linux": {
       "target": [
         "AppImage",
