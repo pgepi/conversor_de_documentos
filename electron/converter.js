@@ -293,7 +293,7 @@ class ConversionEngine {
           }
         } catch (fullErr) {
           if (ext === '.doc') {
-            throw new Error(`Arquivos .DOC legados requerem o LibreOffice instalado. Instale na aba 'Pré-requisitos'. Erro: ${fullErr.message}`);
+            throw new Error(`Arquivos .DOC legados requerem o LibreOffice. Habilite a opção portátil no instalador do sistema. Erro: ${fullErr.message}`);
           }
           throw fullErr;
         }

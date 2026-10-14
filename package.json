@@ -67,13 +67,20 @@
       ],
       "icon": "assets/icon.ico"
     },
+    "extraResources": [
+      {
+        "from": "build/installer-prereqs.ps1",
+        "to": "installer-prereqs.ps1"
+      }
+    ],
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Conversor de Documentos",
-      "artifactName": "Conversor-de-Documentos-Setup-${version}.${ext}"
+      "artifactName": "Conversor-de-Documentos-Setup-${version}.${ext}",
+      "include": "build/installer.nsh"
     },
     "portable": {
       "artifactName": "Conversor-de-Documentos-Portable-${version}.${ext}"

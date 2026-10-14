@@ -32,6 +32,40 @@ class PrerequisitesManager {
         process.env.PATH = `${loDir}${sep}${process.env.PATH}`;
       }
     }
+
+    const pyPath = this.getPythonPath();
+    if (pyPath) {
+      const pyDir = path.dirname(pyPath);
+      const sep = this.platform === 'win32' ? ';' : ':';
+      if (!process.env.PATH.includes(pyDir)) {
+        process.env.PATH = `${pyDir}${sep}${process.env.PATH}`;
+      }
+    }
+  }
+
+  /**
+   * Localiza o executável do Python, priorizando a versão portátil em bin/python
+   */
+  getPythonPath() {
+    const portableCandidates = [
+      path.join(this.appPath, 'bin', 'python', 'python.exe'),
+      path.join(this.userDataPath, 'bin', 'python', 'python.exe'),
+      path.join(this.appPath, 'bin', 'python', 'bin', 'python3'),
+      path.join(this.userDataPath, 'bin', 'python', 'bin', 'python3')
+    ];
+
+    for (const p of portableCandidates) {
+      if (fs.existsSync(p)) return p;
+    }
+
+    try {
+      const cmd = this.platform === 'win32' ? 'where python 2>nul' : 'which python3 || which python 2>/dev/null';
+      const out = execSync(cmd, { encoding: 'utf-8' }).trim();
+      if (out) return out.split(/\r?\n/)[0];
+    } catch (e) {
+      // Ignored
+    }
+    return null;
   }
 
   /**
@@ -161,20 +195,25 @@ class PrerequisitesManager {
     }
 
     // Detalhes do Python
-    try {
-      const pyVer = execSync('python --version', { encoding: 'utf-8', timeout: 3000 }).trim();
-      status.python.installed = true;
-      status.python.version = pyVer;
-      status.python.path = execSync(this.platform === 'win32' ? 'where python' : 'which python', { encoding: 'utf-8' }).split(/\r?\n/)[0];
-
+    const pyPath = this.getPythonPath();
+    if (pyPath) {
       try {
-        const lpVer = execSync('python -c "import liteparse; print(liteparse.__version__)"', { encoding: 'utf-8', timeout: 3000 }).trim();
-        status.liteparsePython.installed = true;
-        status.liteparsePython.version = lpVer;
+        const pyVer = execSync(`"${pyPath}" --version`, { encoding: 'utf-8', timeout: 3000 }).trim();
+        status.python.installed = true;
+        status.python.version = pyVer;
+        status.python.path = pyPath;
+
+        try {
+          const lpVer = execSync(`"${pyPath}" -c "import liteparse; print(liteparse.__version__)"`, { encoding: 'utf-8', timeout: 3000 }).trim();
+          status.liteparsePython.installed = true;
+          status.liteparsePython.version = lpVer;
+        } catch (e) {
+          status.liteparsePython.installed = false;
+        }
       } catch (e) {
-        status.liteparsePython.installed = false;
+        status.python.installed = false;
       }
-    } catch (e) {
+    } else {
       status.python.installed = false;
     }
 
@@ -182,20 +221,24 @@ class PrerequisitesManager {
   }
 
   /**
-   * Faz download com suporte a redirects (HTTP 301/302)
+   * Faz download com suporte a redirects (HTTP 301/302) e fallback automático HTTPS -> HTTP
    */
   _downloadFile(url, destPath, onProgress = () => {}) {
     return new Promise((resolve, reject) => {
       const file = fs.createWriteStream(destPath);
-      const client = url.startsWith('https') ? https : http;
+      const isHttps = url.startsWith('https');
+      const client = isHttps ? https : http;
 
-      const request = client.get(url, (response) => {
+      const request = client.get(url, { timeout: 20000 }, (response) => {
         if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-          // Segue redirecionamento
+          file.close();
+          fs.unlink(destPath, () => {});
           return this._downloadFile(response.headers.location, destPath, onProgress).then(resolve).catch(reject);
         }
 
-        if (response.statusCode !== 200) {
+        if (response.statusCode !== 200 && response.statusCode !== 206) {
+          file.close();
+          fs.unlink(destPath, () => {});
           return reject(new Error(`Servidor retornou status HTTP ${response.statusCode}`));
         }
 
@@ -217,9 +260,21 @@ class PrerequisitesManager {
         });
       });
 
-      request.on('error', (err) => {
+      const handleFail = (err) => {
+        file.close();
         fs.unlink(destPath, () => {});
+        // Se falhou em HTTPS em espelhos que suportam HTTP, tenta automaticamente via HTTP
+        if (isHttps && url.includes('c3sl.ufpr.br')) {
+          const fallbackUrl = url.replace('https://', 'http://');
+          return this._downloadFile(fallbackUrl, destPath, onProgress).then(resolve).catch(reject);
+        }
         reject(err);
+      };
+
+      request.on('error', handleFail);
+      request.on('timeout', () => {
+        request.destroy();
+        handleFail(new Error('Tempo limite de conexão esgotado (timeout)'));
       });
     });
   }
@@ -264,6 +319,109 @@ class PrerequisitesManager {
   }
 
   /**
+   * Calcula dinamicamente o link para a versão mais recente do LibreOffice Portable
+   */
+  async getLatestLibreOfficePortableUrl(onLog = () => {}) {
+    // 1. Tenta obter asset portátil prioritário do GitHub Releases do conversor_de_documentos
+    try {
+      const release = await this.getLatestGitHubRelease();
+      if (release && release.assets) {
+        const prereqAsset = release.assets.find(a => 
+          a.name.toLowerCase().includes('libreoffice') || 
+          a.name.toLowerCase().includes('prereq')
+        );
+        if (prereqAsset && prereqAsset.browser_download_url) {
+          onLog('info', `Asset oficial identificado no GitHub Release (${release.tag_name || 'latest'}): ${prereqAsset.name}`);
+          return prereqAsset.browser_download_url;
+        }
+      }
+    } catch (e) {
+      // Ignora e segue para os espelhos oficiais
+    }
+
+    // 2. Espelhos oficiais da The Document Foundation (TDF)
+    const baseMirrors = [
+      'http://tdf.c3sl.ufpr.br/libreoffice/portable/',
+      'https://tdf.c3sl.ufpr.br/libreoffice/portable/',
+      'https://download.documentfoundation.org/libreoffice/portable/',
+      'http://download.documentfoundation.org/libreoffice/portable/'
+    ];
+
+    const fetchHtml = (u) => {
+      return new Promise((resolve, reject) => {
+        const client = u.startsWith('https') ? https : http;
+        const req = client.get(u, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 8000 }, (res) => {
+          if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+            return fetchHtml(res.headers.location).then(resolve).catch(reject);
+          }
+          if (res.statusCode !== 200) return reject(new Error('Status ' + res.statusCode));
+          let data = '';
+          res.on('data', chunk => data += chunk);
+          res.on('end', () => resolve(data));
+        });
+        req.on('error', reject);
+        req.on('timeout', () => {
+          req.destroy();
+          reject(new Error('Timeout'));
+        });
+      });
+    };
+
+    const compareSemVer = (a, b) => {
+      const pa = a.split('.').map(n => parseInt(n, 10) || 0);
+      const pb = b.split('.').map(n => parseInt(n, 10) || 0);
+      for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const na = pa[i] || 0;
+        const nb = pb[i] || 0;
+        if (na !== nb) return na - nb;
+      }
+      return 0;
+    };
+
+    for (const mirror of baseMirrors) {
+      try {
+        onLog('info', `Consultando espelho oficial: ${mirror}...`);
+        const html = await fetchHtml(mirror);
+        const versionRegex = /href=["'](\d+\.\d+\.\d+(?:\.\d+)?)\/?["']/g;
+        const versions = [];
+        let match;
+        while ((match = versionRegex.exec(html)) !== null) {
+          versions.push(match[1]);
+        }
+
+        if (versions.length > 0) {
+          versions.sort(compareSemVer);
+          const latestVersion = versions[versions.length - 1];
+          onLog('info', `Última versão detectada dinamicamente: ${latestVersion}`);
+
+          const versionUrl = mirror.endsWith('/') ? mirror + latestVersion + '/' : mirror + '/' + latestVersion + '/';
+          try {
+            const vHtml = await fetchHtml(versionUrl);
+            const fileMatch = vHtml.match(/href=["'](LibreOfficePortable[^"']*MultilingualStandard\.paf\.exe)["']/i) ||
+                              vHtml.match(/href=["'](LibreOfficePortable[^"']*\.paf\.exe)["']/i);
+            if (fileMatch) {
+              const finalUrl = versionUrl + fileMatch[1];
+              onLog('info', `Link calculado para versão mais recente: ${finalUrl}`);
+              return finalUrl;
+            }
+          } catch (e) {
+            const fallbackVersionUrl = versionUrl + `LibreOfficePortable_${latestVersion}_MultilingualStandard.paf.exe`;
+            onLog('info', `Link montado para versão mais recente: ${fallbackVersionUrl}`);
+            return fallbackVersionUrl;
+          }
+        }
+      } catch (err) {
+        onLog('warn', `Consulta ao espelho ${mirror} não respondeu: ${err.message}`);
+      }
+    }
+
+    // 3. Fallback seguro e verificado caso todos os espelhos estejam offline
+    const defaultUrl = 'http://tdf.c3sl.ufpr.br/libreoffice/portable/26.2.4/LibreOfficePortable_26.2.4_MultilingualStandard.paf.exe';
+    onLog('info', `Utilizando link oficial da UFPR C3SL: ${defaultUrl}`);
+    return defaultUrl;
+  }
+
+  /**
    * Instala o LibreOffice de forma 100% PORTÁTIL em subpasta do app
    * Baixa preferencialmente do GitHub Releases mais recente ou fonte oficial
    */
@@ -274,22 +432,8 @@ class PrerequisitesManager {
     onLog('info', `Diretório de destino portátil: ${targetDir}`);
 
     if (this.platform === 'win32') {
-      onLog('info', 'Consultando versão mais recente dos pré-requisitos no GitHub (pgepi/conversor_de_documentos)...');
-
-      let downloadUrl = 'https://download.documentfoundation.org/libreoffice/portable/24.8.4/LibreOfficePortablePrevious_24.8.4_MultilingualStandard.paf.exe';
-      const release = await this.getLatestGitHubRelease();
-
-      if (release && release.assets) {
-        onLog('info', `Versão mais recente no GitHub identificada: ${release.tag_name || 'latest'}`);
-        const prereqAsset = release.assets.find(a => 
-          a.name.toLowerCase().includes('libreoffice') || 
-          a.name.toLowerCase().includes('prereq')
-        );
-        if (prereqAsset && prereqAsset.browser_download_url) {
-          downloadUrl = prereqAsset.browser_download_url;
-          onLog('info', `Utilizando asset oficial do GitHub Release: ${prereqAsset.name}`);
-        }
-      }
+      onLog('info', 'Calculando link para a versão mais recente do LibreOffice Portable...');
+      const downloadUrl = await this.getLatestLibreOfficePortableUrl(onLog);
 
       const tempInstaller = path.join(os.tmpdir(), `LibreOfficePortable_${Date.now()}.paf.exe`);
       onLog('info', `Baixando instalador portátil (100% isolado, sem tocar no sistema)...`);

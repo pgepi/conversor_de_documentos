@@ -34,10 +34,6 @@
       </div>
 
       <div class="title-bar-right">
-        <button id="btn-top-prereqs-badge" class="vscode-btn secondary small" style="display: inline-flex; align-items: center; gap: 6px;" title="Verificar Pré-requisitos">
-          <span id="dot-prereq-status" style="width: 8px; height: 8px; border-radius: 50%; background-color: #cca700;"></span>
-          <span id="txt-prereq-status">Pré-requisitos</span>
-        </button>
         <button id="btn-top-convert" class="vscode-btn success small" title="Iniciar conversão de todos os arquivos">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
           <span>Converter Fila</span>
@@ -65,18 +61,7 @@
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
             </svg>
           </button>
-          <button id="act-btn-prereqs" class="activity-btn" title="Diagnóstico de Pré-requisitos (LibreOffice, Python)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-          </button>
-          <button id="act-btn-integration" class="activity-btn" title="Integração com SO (Send To & Menu de Contexto)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </svg>
-          </button>
-          <button id="act-btn-settings" class="activity-btn" title="Configurações Avançadas">
+          <button id="act-btn-settings" class="activity-btn" title="Configurações">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="3"></circle>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -228,124 +213,10 @@
             <div>
               <label style="display: block; font-size: 11px; margin-bottom: 5px; color: var(--vscode-text-secondary);">DPI de Renderização:</label>
               <input type="number" id="setting-dpi" value="150" min="72" max="600" style="width: 100%;">
-            </div>
-          </div>
-        </div>
-
-        <!-- View 4: Integração com o SO -->
-        <div id="side-view-integration" class="side-view" style="display: none; flex-direction: column; height: 100%;">
-          <div class="sidebar-header">
-            <span>Integrações do Sistema</span>
-          </div>
-          <div class="integration-container">
-            <!-- Card 1: Send To -->
-            <div class="integration-card">
-              <div class="integration-card-header">
-                <span class="integration-card-title">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                  Menu "Enviar para" (Send To)
-                </span>
-                <span id="chip-status-sendto" class="status-chip not-installed">Não Registrado</span>
-              </div>
-              <div style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 12px; line-height: 1.4;">
-                Permite clicar com botão direito em qualquer documento no Windows Explorer e escolher <strong>Enviar para &gt; LiteParse</strong>.
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button id="btn-install-sendto" class="vscode-btn small" style="flex: 1;">Instalar no Send To</button>
-                <button id="btn-uninstall-sendto" class="vscode-btn secondary small">Remover</button>
-              </div>
-            </div>
-
-            <!-- Card 2: Context Menu -->
-            <div class="integration-card">
-              <div class="integration-card-header">
-                <span class="integration-card-title">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
-                  Menu "Converter para..."
-                </span>
-                <span id="chip-status-contextmenu" class="status-chip not-installed">Não Registrado</span>
-              </div>
-              <div style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 12px; line-height: 1.4;">
-                Adiciona ao menu de contexto do Windows as opções rápidas:
-                <ul style="margin: 6px 0 6px 18px;">
-                  <li>Converter para Markdown (.md)</li>
-                  <li>Converter para Markdown com OCR</li>
-                  <li>Converter para Texto (.txt)</li>
-                  <li>Converter para JSON (.json)</li>
-                </ul>
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button id="btn-install-contextmenu" class="vscode-btn small" style="flex: 1;">Registrar Menu de Contexto</button>
-                <button id="btn-uninstall-contextmenu" class="vscode-btn secondary small">Remover</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- View 5: Pré-requisitos do Sistema -->
-        <div id="side-view-prereqs" class="side-view" style="display: none; flex-direction: column; height: 100%;">
-          <div class="sidebar-header">
-            <span>Pré-requisitos do Sistema</span>
-          </div>
-          <div class="integration-container" style="overflow-y: auto;">
-            <!-- Card LibreOffice Portátil -->
-            <div class="integration-card">
-              <div class="integration-card-header">
-                <span class="integration-card-title">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                  LibreOffice Portátil (Isolado)
-                </span>
-                <span id="chip-status-libreoffice" class="status-chip not-installed">Verificando...</span>
-              </div>
-              <div id="desc-libreoffice" style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 12px; line-height: 1.4;">
-                Instalação <strong>100% portátil</strong> em subpasta local (<span class="mono">bin/libreoffice</span>). Não modifica o Registro do Windows, não altera o PATH do sistema e não requer permissões de Administrador.
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button id="btn-install-libreoffice" class="vscode-btn small success" style="flex: 1;">
-                  Baixar LibreOffice Portátil (1-Clique)
-                </button>
-                <button id="btn-recheck-prereqs" class="vscode-btn secondary small" title="Reverificar">
-                  Verificar
-                </button>
-              </div>
-            </div>
-
-            <!-- Card Python -->
-            <div class="integration-card">
-              <div class="integration-card-header">
-                <span class="integration-card-title">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>
-                  Python 3 & LiteParse
-                </span>
-                <span id="chip-status-python" class="status-chip not-installed">Verificando...</span>
-              </div>
-              <div id="desc-python" style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 12px; line-height: 1.4;">
-                Ambiente Python para execução do motor estendido do LiteParse.
-              </div>
-              <div style="display: flex; gap: 8px;">
-                <button id="btn-install-pip-liteparse" class="vscode-btn small secondary" style="flex: 1;">
-                  Instalar liteparse no Python
-                </button>
-              </div>
-            </div>
-
-            <!-- Card Motores e Instaladores -->
-            <div class="integration-card">
-              <div class="integration-card-header">
-                <span class="integration-card-title">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                  Instaladores do Sistema
-                </span>
-                <span class="status-chip installed">Multiplataforma</span>
-              </div>
-              <div style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 8px; line-height: 1.4;">
-                Geração de pacotes prontos para distribuição com identidade visual da PGE:
-                <ul style="margin: 6px 0 6px 18px;">
-                  <li><strong>Windows:</strong> Instalador NSIS .exe (com atalhos e SendTo)</li>
-                  <li><strong>Linux:</strong> Pacotes .AppImage e .deb</li>
-                  <li><strong>macOS:</strong> Pacotes .dmg e .zip</li>
-                </ul>
-              </div>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--vscode-border);">
+              <div style="font-size: 11px; font-weight: 600; color: var(--vscode-text-secondary); margin-bottom: 6px;">Status dos Componentes:</div>
+              <div id="settings-diag-python" style="font-size: 11px; color: var(--vscode-text-muted); margin-bottom: 3px;">• Python 3: Detectando...</div>
+              <div id="settings-diag-libreoffice" style="font-size: 11px; color: var(--vscode-text-muted);">• LibreOffice (DOC/XLS/PPT): Detectando...</div>
             </div>
           </div>
         </div>

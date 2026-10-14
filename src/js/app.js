@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Activity Bar
     actExplorer: document.getElementById('act-btn-explorer'),
     actPresets: document.getElementById('act-btn-presets'),
-    actIntegration: document.getElementById('act-btn-integration'),
     actSettings: document.getElementById('act-btn-settings'),
     actLogs: document.getElementById('act-btn-logs'),
 
@@ -38,7 +37,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     sideExplorer: document.getElementById('side-view-explorer'),
     sidePresets: document.getElementById('side-view-presets'),
     sideSettings: document.getElementById('side-view-settings'),
-    sideIntegration: document.getElementById('side-view-integration'),
 
     // File Queue & Buttons
     btnAddFiles: document.getElementById('btn-add-files'),
@@ -93,27 +91,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusPresetTag: document.getElementById('status-preset-tag'),
     statusEngineTag: document.getElementById('status-engine-tag'),
 
-    // Integration Cards
-    chipSendTo: document.getElementById('chip-status-sendto'),
-    chipContextMenu: document.getElementById('chip-status-contextmenu'),
-    btnInstallSendTo: document.getElementById('btn-install-sendto'),
-    btnUninstallSendTo: document.getElementById('btn-uninstall-sendto'),
-    btnInstallContextMenu: document.getElementById('btn-install-contextmenu'),
-    btnUninstallContextMenu: document.getElementById('btn-uninstall-contextmenu'),
-
-    // Prerequisites
-    actPrereqs: document.getElementById('act-btn-prereqs'),
-    sidePrereqs: document.getElementById('side-view-prereqs'),
-    btnTopPrereqsBadge: document.getElementById('btn-top-prereqs-badge'),
-    dotPrereqStatus: document.getElementById('dot-prereq-status'),
-    txtPrereqStatus: document.getElementById('txt-prereq-status'),
-    chipStatusLibreoffice: document.getElementById('chip-status-libreoffice'),
-    descLibreoffice: document.getElementById('desc-libreoffice'),
-    btnInstallLibreoffice: document.getElementById('btn-install-libreoffice'),
-    btnRecheckPrereqs: document.getElementById('btn-recheck-prereqs'),
-    chipStatusPython: document.getElementById('chip-status-python'),
-    descPython: document.getElementById('desc-python'),
-    btnInstallPipLiteparse: document.getElementById('btn-install-pip-liteparse'),
+    // Diagnostic status elements
+    settingsDiagPython: document.getElementById('settings-diag-python'),
+    settingsDiagLibreOffice: document.getElementById('settings-diag-libreoffice'),
 
     // Presets Container
     presetsCardsContainer: document.getElementById('presets-cards-container'),
@@ -138,8 +118,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Erro ao carregar presets:', e);
   }
 
-  // Inicialização de Status de Integração
-  updateIntegrationStatus();
+  // Inicialização de diagnóstico dos componentes
+  updateComponentDiagnostics();
 
   // Tratamento de arquivos recebidos via linha de comando / Send To / Context Menu
   try {
@@ -183,8 +163,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const navTabs = [
     { btn: dom.actExplorer, view: dom.sideExplorer, name: 'explorer' },
     { btn: dom.actPresets, view: dom.sidePresets, name: 'presets' },
-    { btn: dom.actPrereqs, view: dom.sidePrereqs, name: 'prereqs' },
-    { btn: dom.actIntegration, view: dom.sideIntegration, name: 'integration' },
     { btn: dom.actSettings, view: dom.sideSettings, name: 'settings' }
   ];
 
@@ -205,10 +183,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.addEventListener('click', () => {
       switchSideTab(name);
     });
-  });
-
-  dom.btnTopPrereqsBadge.addEventListener('click', () => {
-    switchSideTab('prereqs');
   });
 
   dom.actLogs.addEventListener('click', () => {
@@ -922,169 +896,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // ==========================================
-  // INTEGRAÇÃO COM O SISTEMA (SEND TO & CONTEXT MENU)
+  // DIAGNÓSTICO DISCRETO DOS COMPONENTES
   // ==========================================
-  async function updateIntegrationStatus() {
-    try {
-      const status = await window.electronAPI.getIntegrationStatus();
-      if (status.sendToInstalled) {
-        dom.chipSendTo.className = 'status-chip installed';
-        dom.chipSendTo.textContent = 'Instalado ✓';
-      } else {
-        dom.chipSendTo.className = 'status-chip not-installed';
-        dom.chipSendTo.textContent = 'Não Registrado';
-      }
-
-      if (status.contextMenuInstalled) {
-        dom.chipContextMenu.className = 'status-chip installed';
-        dom.chipContextMenu.textContent = 'Instalado ✓';
-      } else {
-        dom.chipContextMenu.className = 'status-chip not-installed';
-        dom.chipContextMenu.textContent = 'Não Registrado';
-      }
-    } catch (e) {
-      console.error('Erro ao verificar status de integração:', e);
-    }
-  }
-
-  dom.btnInstallSendTo.addEventListener('click', async () => {
-    try {
-      const res = await window.electronAPI.installSendTo();
-      showToast(res.message, 'success');
-      updateIntegrationStatus();
-    } catch (err) {
-      showToast(`Falha: ${err.message}`, 'error');
-    }
-  });
-
-  dom.btnUninstallSendTo.addEventListener('click', async () => {
-    try {
-      const res = await window.electronAPI.uninstallSendTo();
-      showToast(res.message, 'info');
-      updateIntegrationStatus();
-    } catch (err) {
-      showToast(`Falha: ${err.message}`, 'error');
-    }
-  });
-
-  dom.btnInstallContextMenu.addEventListener('click', async () => {
-    try {
-      const res = await window.electronAPI.installContextMenu();
-      showToast(res.message, 'success');
-      updateIntegrationStatus();
-    } catch (err) {
-      showToast(`Falha: ${err.message}`, 'error');
-    }
-  });
-
-  dom.btnUninstallContextMenu.addEventListener('click', async () => {
-    try {
-      const res = await window.electronAPI.uninstallContextMenu();
-      showToast(res.message, 'info');
-      updateIntegrationStatus();
-    } catch (err) {
-      showToast(`Falha: ${err.message}`, 'error');
-    }
-  });
-
-  // ==========================================
-  // DIAGNÓSTICO E INSTALAÇÃO DE PRÉ-REQUISITOS
-  // ==========================================
-  async function updatePrereqsStatus() {
+  async function updateComponentDiagnostics() {
     try {
       const pStatus = await window.electronAPI.getPrereqStatus();
-
-      // LibreOffice
-      if (pStatus.libreoffice.installed) {
-        dom.chipStatusLibreoffice.className = 'status-chip installed';
-        if (pStatus.libreoffice.isPortable) {
-          dom.chipStatusLibreoffice.textContent = 'Portátil (Isolado) ✓';
-          dom.descLibreoffice.innerHTML = `LibreOffice Portátil ativo em <span class="mono">bin/libreoffice</span>. Suporte a <strong>.DOC, .DOCX, .XLSX, .PPTX</strong> 100% isolado!`;
+      if (dom.settingsDiagPython) {
+        if (pStatus.python && pStatus.python.installed) {
+          dom.settingsDiagPython.innerHTML = `• Python 3: <span style="color:#89d185;">${pStatus.python.version} ✓</span>`;
         } else {
-          dom.chipStatusLibreoffice.textContent = 'Sistema (Global) ✓';
-          dom.descLibreoffice.innerHTML = `LibreOffice detectado no sistema (${pStatus.libreoffice.version || 'OK'}). Suporte a <strong>.DOC, .DOCX, .XLSX, .PPTX</strong> ativo!`;
+          dom.settingsDiagPython.innerHTML = `• Python 3: <span style="color:#cca700;">Não detectado no PATH</span>`;
         }
-        dom.btnInstallLibreoffice.style.display = 'none';
-      } else {
-        dom.chipStatusLibreoffice.className = 'status-chip not-installed';
-        dom.chipStatusLibreoffice.textContent = 'Não Instalado';
-        dom.descLibreoffice.innerHTML = 'Instalação <strong>100% portátil</strong> em subpasta (<span class="mono">bin/libreoffice</span>), sem alterar o Registro nem poluir o SO.';
-        dom.btnInstallLibreoffice.style.display = 'inline-flex';
       }
-
-      // Python
-      if (pStatus.python.installed) {
-        dom.chipStatusPython.className = 'status-chip installed';
-        dom.chipStatusPython.textContent = `${pStatus.python.version} ✓`;
-        dom.descPython.innerHTML = `Ambiente Python ativo (${pStatus.python.version}). LiteParse Python: <strong>${pStatus.liteparsePython.installed ? 'Instalado ✓' : 'Disponível'}</strong>.`;
-        dom.btnInstallPipLiteparse.style.display = pStatus.liteparsePython.installed ? 'none' : 'inline-flex';
-      } else {
-        dom.chipStatusPython.className = 'status-chip not-installed';
-        dom.chipStatusPython.textContent = 'Python Não Detectado';
-      }
-
-      // Top Bar Pill
-      if (pStatus.libreoffice.installed) {
-        dom.dotPrereqStatus.style.backgroundColor = '#89d185';
-        dom.txtPrereqStatus.textContent = pStatus.libreoffice.isPortable ? 'Portátil Pronto' : 'Sistema Pronto';
-      } else {
-        dom.dotPrereqStatus.style.backgroundColor = '#cca700';
-        dom.txtPrereqStatus.textContent = 'LibreOffice Pendente';
+      if (dom.settingsDiagLibreOffice) {
+        if (pStatus.libreoffice && pStatus.libreoffice.installed) {
+          const mode = pStatus.libreoffice.isPortable ? 'Portátil (bin/libreoffice)' : 'Sistema';
+          dom.settingsDiagLibreOffice.innerHTML = `• LibreOffice: <span style="color:#89d185;">Ativo (${mode}) ✓</span>`;
+        } else {
+          dom.settingsDiagLibreOffice.innerHTML = `• LibreOffice: <span style="color:#cca700;">Não instalado (DOC/XLS indisponíveis)</span>`;
+        }
       }
     } catch (e) {
-      console.error('Erro ao verificar pré-requisitos:', e);
+      console.warn('Erro ao atualizar status dos componentes:', e);
     }
   }
-
-  dom.btnRecheckPrereqs.addEventListener('click', async () => {
-    showToast('Verificando pré-requisitos locais...', 'info');
-    await updatePrereqsStatus();
-    showToast('Verificação concluída!', 'success');
-  });
-
-  dom.btnInstallLibreoffice.addEventListener('click', async () => {
-    dom.btnInstallLibreoffice.disabled = true;
-    dom.btnInstallLibreoffice.textContent = 'Baixando... (Aguarde)';
-    showToast('Baixando LibreOffice Portátil para a pasta local bin/libreoffice... Acompanhe no console.', 'info');
-    dom.bottomPanel.classList.remove('collapsed');
-    appendLog('info', '=======================================================');
-    appendLog('info', 'Iniciando download e extração do LibreOffice Portátil...');
-    appendLog('info', 'Destino: subpasta local bin/libreoffice (100% isolado)');
-    appendLog('info', '=======================================================');
-
-    try {
-      const res = await window.electronAPI.installLibreOffice();
-      showToast(res.message || 'LibreOffice instalado com sucesso!', 'success');
-      await updatePrereqsStatus();
-    } catch (err) {
-      showToast(`Falha na instalação: ${err.message}`, 'error');
-      appendLog('error', `Erro na instalação do LibreOffice: ${err.message}`);
-    } finally {
-      dom.btnInstallLibreoffice.disabled = false;
-      dom.btnInstallLibreoffice.textContent = 'Instalar LibreOffice (1-Clique)';
-    }
-  });
-
-  dom.btnInstallPipLiteparse.addEventListener('click', async () => {
-    dom.btnInstallPipLiteparse.disabled = true;
-    dom.btnInstallPipLiteparse.textContent = 'Instalando...';
-    showToast('Executando pip install liteparse... Acompanhe no console.', 'info');
-    dom.bottomPanel.classList.remove('collapsed');
-
-    try {
-      await window.electronAPI.installLiteParsePython();
-      showToast('LiteParse instalado com sucesso no Python!', 'success');
-      await updatePrereqsStatus();
-    } catch (err) {
-      showToast(`Falha no pip install: ${err.message}`, 'error');
-    } finally {
-      dom.btnInstallPipLiteparse.disabled = false;
-      dom.btnInstallPipLiteparse.textContent = 'Instalar liteparse no Python';
-    }
-  });
-
-  // Chama verificação de pré-requisitos na inicialização
-  updatePrereqsStatus();
 
   // ==========================================
   // CONFIGURAÇÕES AVANÇADAS
