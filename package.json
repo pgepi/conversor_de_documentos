@@ -2,7 +2,7 @@
   "name": "conversor-documentos",
   "productName": "Conversor de Documentos",
   "desktopName": "conversor-documentos",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Conversor de Documentos Inteligente - Procuradoria Geral do Estado (PGE)",
   "main": "electron/main.js",
   "scripts": {
@@ -71,6 +71,10 @@
       {
         "from": "build/installer-prereqs.ps1",
         "to": "installer-prereqs.ps1"
+      },
+      {
+        "from": "build/7za.exe",
+        "to": "7za.exe"
       }
     ],
     "nsis": {

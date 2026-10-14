@@ -448,13 +448,41 @@ class PrerequisitesManager {
 
         onLog('info', 'Download concluído! Extraindo binários portáteis silenciosamente...');
 
+        const sevenZipCandidates = [
+          path.join(process.resourcesPath || '', '7za.exe'),
+          path.join(this.appPath, 'build', '7za.exe'),
+          path.join(this.appPath, 'resources', '7za.exe'),
+          path.join(__dirname, '..', 'build', '7za.exe')
+        ];
+        let sevenZip = null;
+        for (const c of sevenZipCandidates) {
+          if (fs.existsSync(c)) { sevenZip = c; break; }
+        }
+
         return new Promise((resolve, reject) => {
-          // Extração silenciosa do PAF em subpasta local
-          const child = spawn(tempInstaller, [`/DEST=${targetDir}`, '/S']);
+          let child;
+          if (sevenZip) {
+            onLog('info', 'Utilizando motor 7-Zip para extração 100% desassistida...');
+            child = spawn(sevenZip, ['x', tempInstaller, `-o${targetDir}`, '-y']);
+          } else {
+            child = spawn(tempInstaller, [`/DEST=${targetDir}`, '/S']);
+          }
 
           child.on('close', (code) => {
             // Remove instalador temporário
             try { fs.unlinkSync(tempInstaller); } catch (e) {}
+
+            // Normaliza estrutura se extraído em App/libreoffice
+            const nestedProgram = path.join(targetDir, 'App', 'libreoffice', 'program', 'soffice.exe');
+            const rootProgram = path.join(targetDir, 'program', 'soffice.exe');
+            if (fs.existsSync(nestedProgram) && !fs.existsSync(rootProgram)) {
+              try {
+                const nestedBase = path.join(targetDir, 'App', 'libreoffice');
+                fs.cpSync(nestedBase, targetDir, { recursive: true });
+              } catch (cpErr) {
+                // Ignored
+              }
+            }
 
             this.setupEnvironment();
             const loPath = this.getLibreOfficePath();
