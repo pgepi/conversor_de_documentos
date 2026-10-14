@@ -1,0 +1,89 @@
+:root {
+  --vscode-bg-editor: #1e1e1e;
+  --vscode-bg-sidebar: #252526;
+  --vscode-bg-activitybar: #333333;
+  --vscode-bg-panel: #1e1e1e;
+  --vscode-bg-statusbar: #007acc;
+  --vscode-bg-statusbar-busy: #0e639c;
+  --vscode-bg-statusbar-error: #c72e2e;
+  --vscode-bg-tab-active: #1e1e1e;
+  --vscode-bg-tab-inactive: #2d2d2d;
+  --vscode-bg-hover: #2a2d2e;
+  --vscode-bg-selected: #04395e;
+  --vscode-bg-badge: #4d4d4d;
+  --vscode-bg-input: #3c3c3c;
+  --vscode-border: #3c3c3c;
+  --vscode-border-light: #454545;
+  --vscode-text-primary: #cccccc;
+  --vscode-text-secondary: #969696;
+  --vscode-text-highlight: #ffffff;
+  --vscode-accent: #007acc;
+  --vscode-accent-hover: #0062a3;
+  --vscode-green: #89d185;
+  --vscode-yellow: #cca700;
+  --vscode-red: #f14c4c;
+  --vscode-cyan: #4ec9b0;
+  --vscode-blue: #569cd6;
+  --vscode-orange: #ce9178;
+  --vscode-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --vscode-font-mono: 'Consolas', 'Courier New', 'Cascadia Code', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--vscode-font-family);
+  font-size: 13px;
+  color: var(--vscode-text-primary);
+  background-color: var(--vscode-bg-editor);
+  overflow: hidden;
+  user-select: none;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Scrollbars estilo VSCode */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(121, 121, 121, 0.4);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.7);
+}
+
+button {
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  border-radius: 2px;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 12px;
+  background-color: var(--vscode-bg-input);
+  color: var(--vscode-text-highlight);
+  border: 1px solid var(--vscode-border);
+  padding: 4px 8px;
+  border-radius: 2px;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--vscode-accent);
+}
+
+.mono {
+  font-family: var(--vscode-font-mono);
+}

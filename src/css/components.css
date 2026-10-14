@@ -1,0 +1,406 @@
+/* Componentes e Controles da Interface */
+
+/* Botões Estilo VSCode */
+.vscode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: var(--vscode-accent);
+  color: #ffffff;
+  padding: 6px 12px;
+  font-weight: 500;
+  border-radius: 2px;
+  transition: background-color 0.15s ease;
+}
+.vscode-btn:hover {
+  background-color: var(--vscode-accent-hover);
+}
+.vscode-btn:active {
+  background-color: #00538b;
+}
+
+.vscode-btn.secondary {
+  background-color: #3a3d41;
+  color: #cccccc;
+}
+.vscode-btn.secondary:hover {
+  background-color: #45494e;
+  color: #ffffff;
+}
+
+.vscode-btn.success {
+  background-color: #238636;
+}
+.vscode-btn.success:hover {
+  background-color: #2ea043;
+}
+
+.vscode-btn.danger {
+  background-color: #b32d2e;
+}
+.vscode-btn.danger:hover {
+  background-color: #cf3838;
+}
+
+.vscode-btn.small {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+/* Área de Dropzone */
+.dropzone-container {
+  border: 1px dashed #44474a;
+  border-radius: 4px;
+  padding: 16px;
+  margin: 12px;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.02);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.dropzone-container:hover, .dropzone-container.drag-over {
+  border-color: var(--vscode-accent);
+  background-color: rgba(0, 122, 204, 0.08);
+}
+.dropzone-icon {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 6px;
+  color: var(--vscode-accent);
+}
+.dropzone-text {
+  font-size: 11px;
+  color: var(--vscode-text-secondary);
+}
+
+/* Fila de Arquivos */
+.queue-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.queue-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.queue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+.queue-item:hover {
+  background-color: var(--vscode-bg-hover);
+}
+.queue-item.active {
+  background-color: var(--vscode-bg-selected);
+  border-left-color: var(--vscode-accent);
+}
+
+.queue-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.file-ext-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.file-ext-icon.pdf {
+  background-color: #f40f02;
+  color: white;
+}
+.file-ext-icon.docx {
+  background-color: #185abd;
+  color: white;
+}
+.file-ext-icon.xlsx {
+  background-color: #107c41;
+  color: white;
+}
+.file-ext-icon.img {
+  background-color: #d83b01;
+  color: white;
+}
+.file-ext-icon.other {
+  background-color: #6c757d;
+  color: white;
+}
+
+.queue-item-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.queue-item-name {
+  font-size: 12px;
+  color: var(--vscode-text-highlight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  color: var(--vscode-text-secondary);
+}
+
+.queue-badge {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background-color: #333333;
+}
+.queue-badge.pending {
+  color: var(--vscode-text-secondary);
+}
+.queue-badge.converting {
+  background-color: #007acc;
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+.queue-badge.success {
+  background-color: #238636;
+  color: white;
+}
+.queue-badge.error {
+  background-color: #cf3838;
+  color: white;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* Configuração de Destino */
+.dest-config-panel {
+  padding: 12px;
+  border-top: 1px solid var(--vscode-border);
+  background-color: #212121;
+}
+
+.dest-config-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--vscode-text-secondary);
+  margin-bottom: 8px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--vscode-text-primary);
+  cursor: pointer;
+}
+
+.dest-path-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.dest-path-input {
+  flex: 1;
+  font-size: 11px;
+  color: #858585;
+}
+
+/* Painel de Presets Expressos */
+.presets-container {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preset-card {
+  background-color: #2a2d2e;
+  border: 1px solid var(--vscode-border);
+  border-radius: 4px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.preset-card:hover {
+  border-color: var(--vscode-accent);
+  background-color: #2d3133;
+}
+.preset-card.active {
+  border-color: var(--vscode-accent);
+  background-color: #092f4c;
+}
+
+.preset-card-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.preset-card-desc {
+  font-size: 11px;
+  color: var(--vscode-text-secondary);
+  line-height: 1.4;
+}
+
+/* Painel de Integração do Sistema */
+.integration-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.integration-card {
+  background-color: #2a2d2e;
+  border: 1px solid var(--vscode-border);
+  border-radius: 4px;
+  padding: 14px;
+}
+
+.integration-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.integration-card-title {
+  font-weight: 600;
+  font-size: 12.5px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-chip {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.status-chip.installed {
+  background-color: rgba(35, 134, 54, 0.2);
+  color: #89d185;
+  border: 1px solid #238636;
+}
+.status-chip.not-installed {
+  background-color: rgba(207, 56, 56, 0.15);
+  color: #f14c4c;
+  border: 1px solid #cf3838;
+}
+
+/* Linhas de Log no Console */
+.log-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 1px 0;
+  font-family: var(--vscode-font-mono);
+  font-size: 11.5px;
+  word-break: break-all;
+}
+
+.log-time {
+  color: #6e7681;
+  flex-shrink: 0;
+}
+
+.log-level {
+  font-weight: 600;
+  flex-shrink: 0;
+  padding: 0 4px;
+  border-radius: 2px;
+  font-size: 10px;
+}
+.log-level.info {
+  color: #569cd6;
+}
+.log-level.warn {
+  color: #cca700;
+}
+.log-level.error {
+  color: #f14c4c;
+}
+.log-level.success {
+  color: #89d185;
+}
+
+.log-msg {
+  color: #cccccc;
+  flex: 1;
+}
+
+/* Toast Notifications */
+#toast-container {
+  position: fixed;
+  bottom: 35px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.toast {
+  background-color: #252526;
+  border: 1px solid var(--vscode-border);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  border-radius: 4px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+  max-width: 420px;
+  color: #ffffff;
+  font-size: 12px;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}

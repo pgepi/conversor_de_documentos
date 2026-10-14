@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' file: data:; img-src 'self' file: data: https:; object-src 'self' file:;">
+  <title>LiteParse Studio</title>
+  <link rel="stylesheet" href="css/vscode-theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/viewer.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="../node_modules/highlight.js/styles/github-dark.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Top Title Bar -->
+    <header id="title-bar">
+      <div class="title-bar-left">
+        <div class="app-logo-badge">
+          <img src="assets/logo_pge.svg" alt="PGE Logo" style="height: 24px; width: auto; object-fit: contain;">
+          <span style="font-weight: 700; color: #ffffff; letter-spacing: 0.3px;">Conversor de Documentos</span>
+          <span style="background-color: #005d83; color: #ffffff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 3px; letter-spacing: 0.5px;">PGE</span>
+        </div>
+      </div>
+
+      <div class="title-bar-center">
+        <div class="quick-search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span id="quick-preset-title">Preset: 📄 Padrão (Markdown com OCR)</span>
+        </div>
+      </div>
+
+      <div class="title-bar-right">
+        <button id="btn-top-prereqs-badge" class="vscode-btn secondary small" style="display: inline-flex; align-items: center; gap: 6px;" title="Verificar Pré-requisitos">
+          <span id="dot-prereq-status" style="width: 8px; height: 8px; border-radius: 50%; background-color: #cca700;"></span>
+          <span id="txt-prereq-status">Pré-requisitos</span>
+        </button>
+        <button id="btn-top-convert" class="vscode-btn success small" title="Iniciar conversão de todos os arquivos">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Converter Fila</span>
+        </button>
+        <button id="btn-top-cancel" class="vscode-btn danger small" style="display: none;" title="Cancelar conversão em andamento">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+          <span>Cancelar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div id="main-content">
+      <!-- 1. Activity Bar -->
+      <nav id="activity-bar">
+        <div class="activity-group">
+          <button id="act-btn-explorer" class="activity-btn active" title="Explorador de Arquivos e Fila">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+              <polyline points="13 2 13 9 20 9"></polyline>
+            </svg>
+          </button>
+          <button id="act-btn-presets" class="activity-btn" title="Processamento Expresso & Presets">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </button>
+          <button id="act-btn-prereqs" class="activity-btn" title="Diagnóstico de Pré-requisitos (LibreOffice, Python)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </button>
+          <button id="act-btn-integration" class="activity-btn" title="Integração com SO (Send To & Menu de Contexto)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </button>
+          <button id="act-btn-settings" class="activity-btn" title="Configurações Avançadas">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="activity-group">
+          <button id="act-btn-logs" class="activity-btn" title="Alternar Painel de Logs / Terminal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      <!-- 2. Side Bar -->
+      <aside id="sidebar">
+        <!-- View 1: Explorer & Fila -->
+        <div id="side-view-explorer" class="side-view" style="display: flex; flex-direction: column; height: 100%;">
+          <div class="sidebar-header">
+            <span>Fila de Conversão</span>
+            <div class="sidebar-actions">
+              <button id="btn-add-files" class="icon-btn" title="Adicionar Arquivos">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+              <button id="btn-add-folder" class="icon-btn" title="Adicionar Pasta com Documentos">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              </button>
+              <button id="btn-clear-queue" class="icon-btn" title="Limpar Lista">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dropzone -->
+          <div id="dropzone" class="dropzone-container">
+            <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <div class="dropzone-text">Arraste arquivos ou pastas aqui</div>
+            <div style="font-size: 10px; color: #777; margin-top: 4px;">PDF, DOCX, XLSX, Imagens, etc.</div>
+          </div>
+
+          <!-- Quick Actions Bar -->
+          <div class="queue-header-actions">
+            <button id="btn-select-files-alt" class="vscode-btn secondary small" style="flex: 1;">
+              + Arquivos
+            </button>
+            <button id="btn-select-folder-alt" class="vscode-btn secondary small" style="flex: 1;">
+              + Pasta
+            </button>
+          </div>
+
+          <!-- Lista de Arquivos -->
+          <div id="queue-items-container" class="queue-list">
+            <!-- Os itens da fila serão renderizados dinamicamente aqui -->
+            <div id="empty-queue-message" style="padding: 24px; text-align: center; color: var(--vscode-text-secondary); font-size: 11.5px;">
+              Nenhum documento na fila.<br>Adicione arquivos ou pastas para começar.
+            </div>
+          </div>
+
+          <!-- Configuração da Pasta de Destino -->
+          <div class="dest-config-panel">
+            <div class="dest-config-title">Pasta de Destino</div>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="dest-type" id="dest-type-source" value="source" checked>
+                <span>Mesma pasta de origem (Padrão)</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="dest-type" id="dest-type-custom" value="custom">
+                <span>Pasta personalizada</span>
+              </label>
+            </div>
+            <div id="custom-dest-box" class="dest-path-box" style="display: none;">
+              <input type="text" id="custom-dest-input" class="dest-path-input" placeholder="Selecione a pasta de destino..." readonly>
+              <button id="btn-browse-dest" class="vscode-btn secondary small">...</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 2: Presets Expressos -->
+        <div id="side-view-presets" class="side-view" style="display: none; flex-direction: column; height: 100%;">
+          <div class="sidebar-header">
+            <span>Processamento Expresso</span>
+          </div>
+          <div class="presets-container" id="presets-cards-container">
+            <!-- Cards de presets renderizados dinamicamente -->
+          </div>
+        </div>
+
+        <!-- View 3: Configurações do Motor -->
+        <div id="side-view-settings" class="side-view" style="display: none; flex-direction: column; height: 100%; padding: 14px; overflow-y: auto;">
+          <div class="sidebar-header" style="padding: 0 0 10px 0;">
+            <span>Opções Avançadas</span>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="display: block; font-size: 11px; margin-bottom: 5px; color: var(--vscode-text-secondary);">Motor de Processamento:</label>
+              <select id="setting-engine" style="width: 100%;">
+                <option value="native" selected>⚡ LiteParse Nativo (Node/Rust - Ultrarrápido)</option>
+                <option value="python">🐍 LiteParse Python (Local)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 11px; margin-bottom: 5px; color: var(--vscode-text-secondary);">Formato Padrão:</label>
+              <select id="setting-format" style="width: 100%;">
+                <option value="markdown" selected>Markdown (.md)</option>
+                <option value="text">Texto Puro (.txt)</option>
+                <option value="json">JSON Estruturado com BBoxes (.json)</option>
+              </select>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 12px;">Habilitar OCR (Tesseract):</span>
+              <input type="checkbox" id="setting-ocr" checked>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 11px; margin-bottom: 5px; color: var(--vscode-text-secondary);">Idioma OCR:</label>
+              <select id="setting-ocr-lang" style="width: 100%;">
+                <option value="eng" selected>Inglês (eng)</option>
+                <option value="por">Português (por)</option>
+                <option value="spa">Espanhol (spa)</option>
+                <option value="fra">Francês (fra)</option>
+                <option value="deu">Alemão (deu)</option>
+              </select>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 12px;">Extrair Imagens Embutidas:</span>
+              <input type="checkbox" id="setting-extract-images">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 11px; margin-bottom: 5px; color: var(--vscode-text-secondary);">Modo de Imagens no Markdown:</label>
+              <select id="setting-image-mode" style="width: 100%;">
+                <option value="placeholder" selected>Placeholder [Imagem: figura-1.png]</option>
+                <option value="embed">Embed (Extrair para subpasta)</option>
+                <option value="off">Ignorar imagens</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 11px; margin-bottom: 5px; color: var(--vscode-text-secondary);">DPI de Renderização:</label>
+              <input type="number" id="setting-dpi" value="150" min="72" max="600" style="width: 100%;">
+            </div>
+          </div>
+        </div>
+
+        <!-- View 4: Integração com o SO -->
+        <div id="side-view-integration" class="side-view" style="display: none; flex-direction: column; height: 100%;">
+          <div class="sidebar-header">
+            <span>Integrações do Sistema</span>
+          </div>
+          <div class="integration-container">
+            <!-- Card 1: Send To -->
+            <div class="integration-card">
+              <div class="integration-card-header">
+                <span class="integration-card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                  Menu "Enviar para" (Send To)
+                </span>
+                <span id="chip-status-sendto" class="status-chip not-installed">Não Registrado</span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 12px; line-height: 1.4;">
+                Permite clicar com botão direito em qualquer documento no Windows Explorer e escolher <strong>Enviar para &gt; LiteParse</strong>.
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="btn-install-sendto" class="vscode-btn small" style="flex: 1;">Instalar no Send To</button>
+                <button id="btn-uninstall-sendto" class="vscode-btn secondary small">Remover</button>
+              </div>
+            </div>
+
+            <!-- Card 2: Context Menu -->
+            <div class="integration-card">
+              <div class="integration-card-header">
+                <span class="integration-card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                  Menu "Converter para..."
+                </span>
+                <span id="chip-status-contextmenu" class="status-chip not-installed">Não Registrado</span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 12px; line-height: 1.4;">
+                Adiciona ao menu de contexto do Windows as opções rápidas:
+                <ul style="margin: 6px 0 6px 18px;">
+                  <li>Converter para Markdown (.md)</li>
+                  <li>Converter para Markdown com OCR</li>
+                  <li>Converter para Texto (.txt)</li>
+                  <li>Converter para JSON (.json)</li>
+                </ul>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="btn-install-contextmenu" class="vscode-btn small" style="flex: 1;">Registrar Menu de Contexto</button>
+                <button id="btn-uninstall-contextmenu" class="vscode-btn secondary small">Remover</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 5: Pré-requisitos do Sistema -->
+        <div id="side-view-prereqs" class="side-view" style="display: none; flex-direction: column; height: 100%;">
+          <div class="sidebar-header">
+            <span>Pré-requisitos do Sistema</span>
+          </div>
+          <div class="integration-container" style="overflow-y: auto;">
+            <!-- Card LibreOffice Portátil -->
+            <div class="integration-card">
+              <div class="integration-card-header">
+                <span class="integration-card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  LibreOffice Portátil (Isolado)
+                </span>
+                <span id="chip-status-libreoffice" class="status-chip not-installed">Verificando...</span>
+              </div>
+              <div id="desc-libreoffice" style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 12px; line-height: 1.4;">
+                Instalação <strong>100% portátil</strong> em subpasta local (<span class="mono">bin/libreoffice</span>). Não modifica o Registro do Windows, não altera o PATH do sistema e não requer permissões de Administrador.
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="btn-install-libreoffice" class="vscode-btn small success" style="flex: 1;">
+                  Baixar LibreOffice Portátil (1-Clique)
+                </button>
+                <button id="btn-recheck-prereqs" class="vscode-btn secondary small" title="Reverificar">
+                  Verificar
+                </button>
+              </div>
+            </div>
+
+            <!-- Card Python -->
+            <div class="integration-card">
+              <div class="integration-card-header">
+                <span class="integration-card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>
+                  Python 3 & LiteParse
+                </span>
+                <span id="chip-status-python" class="status-chip not-installed">Verificando...</span>
+              </div>
+              <div id="desc-python" style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 12px; line-height: 1.4;">
+                Ambiente Python para execução do motor estendido do LiteParse.
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button id="btn-install-pip-liteparse" class="vscode-btn small secondary" style="flex: 1;">
+                  Instalar liteparse no Python
+                </button>
+              </div>
+            </div>
+
+            <!-- Card Motores e Instaladores -->
+            <div class="integration-card">
+              <div class="integration-card-header">
+                <span class="integration-card-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                  Instaladores do Sistema
+                </span>
+                <span class="status-chip installed">Multiplataforma</span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--vscode-text-secondary); margin-bottom: 8px; line-height: 1.4;">
+                Geração de pacotes prontos para distribuição com identidade visual da PGE:
+                <ul style="margin: 6px 0 6px 18px;">
+                  <li><strong>Windows:</strong> Instalador NSIS .exe (com atalhos e SendTo)</li>
+                  <li><strong>Linux:</strong> Pacotes .AppImage e .deb</li>
+                  <li><strong>macOS:</strong> Pacotes .dmg e .zip</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 3. Editor Area (Split View) -->
+      <main id="editor-area">
+        <div id="editor-split-container">
+          <!-- Left Pane: Visualizador de Origem -->
+          <div class="editor-pane editor-pane-left">
+            <div class="editor-tab-bar">
+              <div class="tabs-list">
+                <div class="editor-tab active" id="tab-source">
+                  <span class="tab-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                  </span>
+                  <span id="tab-source-title">Documento de Origem</span>
+                </div>
+              </div>
+              <div class="editor-tab-actions">
+                <span id="source-meta-badge" class="viewer-badge" style="display: none;">PDF</span>
+              </div>
+            </div>
+
+            <!-- Conteúdo da Origem -->
+            <div class="pane-content" id="source-content-container">
+              <div class="source-empty-state">
+                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <div class="empty-state-title">Nenhum Documento Selecionado</div>
+                <div class="empty-state-desc">
+                  Selecione um arquivo da fila à esquerda para visualizar seu conteúdo original (PDF, Imagens, Documentos de Texto).
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Pane: Visualizador de Destino (Markdown) -->
+          <div class="editor-pane editor-pane-right">
+            <div class="editor-tab-bar">
+              <div class="tabs-list">
+                <div class="editor-tab active" id="tab-preview">
+                  <span class="tab-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </span>
+                  <span>Visualização (Preview)</span>
+                </div>
+                <div class="editor-tab" id="tab-raw">
+                  <span class="tab-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                  </span>
+                  <span>Markdown Puro (Editor)</span>
+                </div>
+              </div>
+
+              <div class="editor-tab-actions">
+                <button id="btn-copy-markdown" class="icon-btn" title="Copiar Markdown para Área de Transferência">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+                <button id="btn-save-markdown" class="icon-btn" title="Salvar Alterações">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                </button>
+                <button id="btn-reveal-output" class="icon-btn" title="Revelar Arquivo no Explorador">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Conteúdo de Destino -->
+            <div class="pane-content" id="target-content-container">
+              <div class="target-empty-state">
+                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                <div class="empty-state-title">Aguardando Conversão</div>
+                <div class="empty-state-desc">
+                  O resultado convertido em Markdown ou JSON aparecerá aqui com visualização renderizada e editor de código.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Bottom Panel (Terminal / Logs) -->
+        <section id="bottom-panel">
+          <div class="panel-header">
+            <div class="panel-tabs">
+              <div class="panel-tab active" id="p-tab-logs">Output & Logs</div>
+              <div class="panel-tab" id="p-tab-pagination">Paginação & Timings</div>
+            </div>
+            <div class="panel-actions">
+              <input type="text" id="log-filter-input" placeholder="Filtrar logs..." style="height: 22px; width: 140px; font-size: 11px;">
+              <button id="btn-clear-logs" class="icon-btn" title="Limpar Logs">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+              <button id="btn-copy-logs" class="icon-btn" title="Copiar Todos os Logs">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              </button>
+              <button id="btn-toggle-panel" class="icon-btn" title="Minimizar Painel">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="panel-body" id="log-stream-container">
+            <div class="log-line">
+              <span class="log-time">[00:00:00]</span>
+              <span class="log-level info">[INFO]</span>
+              <span class="log-msg">LiteParse Studio inicializado e pronto para processamento.</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 5. Status Bar -->
+    <footer id="status-bar">
+      <div class="status-left">
+        <div class="status-item" id="status-main-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span id="status-text">Pronto</span>
+        </div>
+        <div class="status-item" id="status-page-tracker" style="display: none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+          <span id="status-page-text">Pág. 0 / 0</span>
+        </div>
+        <div class="status-item" id="status-queue-count">
+          <span>0 arquivo(s) na fila</span>
+        </div>
+      </div>
+
+      <div class="status-center">
+        <div class="status-progress-track">
+          <div id="status-progress-bar" class="status-progress-fill"></div>
+        </div>
+        <span id="status-progress-percent" style="font-size: 10px; font-weight: 600;">0%</span>
+      </div>
+
+      <div class="status-right">
+        <div class="status-item" id="status-preset-tag">
+          <span>⚡ Padrão</span>
+        </div>
+        <div class="status-item" id="status-engine-tag">
+          <span>LiteParse Nativo</span>
+        </div>
+        <div class="status-item">
+          <span>UTF-8</span>
+        </div>
+        <div class="status-item">
+          <span>Markdown</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../node_modules/marked/lib/marked.umd.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

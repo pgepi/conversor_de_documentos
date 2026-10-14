@@ -1,0 +1,96 @@
+{
+  "name": "conversor-documentos",
+  "productName": "Conversor de Documentos",
+  "version": "1.0.0",
+  "description": "Conversor de Documentos Inteligente - Procuradoria Geral do Estado (PGE)",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder -mwl"
+  },
+  "keywords": [
+    "conversor-documentos",
+    "pge",
+    "liteparse",
+    "pdf",
+    "docx",
+    "markdown",
+    "ocr",
+    "desktop",
+    "vscode-style"
+  ],
+  "author": "PGE",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@llamaindex/liteparse": "^2.15.1",
+    "highlight.js": "^11.11.1",
+    "mammoth": "^1.13.0",
+    "marked": "^15.0.7"
+  },
+  "devDependencies": {
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "br.gov.pge.conversor-documentos",
+    "productName": "Conversor de Documentos",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "assets/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Conversor de Documentos",
+      "artifactName": "Conversor-de-Documentos-Setup-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "assets/icon.png",
+      "category": "Office",
+      "artifactName": "Conversor-de-Documentos-${version}.${ext}"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "assets/icon.png",
+      "category": "public.app-category.productivity",
+      "artifactName": "Conversor-de-Documentos-${version}.${ext}"
+    }
+  }
+}
