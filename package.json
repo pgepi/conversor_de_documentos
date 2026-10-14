@@ -88,6 +88,12 @@
       "maintainer": "PGE <ti@pge.pi.gov.br>",
       "artifactName": "Conversor-de-Documentos-${version}.${ext}"
     },
+    "appImage": {
+      "artifactName": "Conversor-de-Documentos-Portable-${version}.${ext}"
+    },
+    "deb": {
+      "artifactName": "Conversor-de-Documentos-${version}.${ext}"
+    },
     "mac": {
       "target": [
         "dmg",
@@ -95,7 +101,10 @@
       ],
       "icon": "assets/icon.png",
       "category": "public.app-category.productivity",
-      "artifactName": "Conversor-de-Documentos-${version}.${ext}"
+      "artifactName": "Conversor-de-Documentos-Portable-${version}.${ext}"
+    },
+    "dmg": {
+      "artifactName": "Conversor-de-Documentos-Setup-${version}.${ext}"
     }
   }
 }
