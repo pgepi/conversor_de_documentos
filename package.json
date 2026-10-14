@@ -1,6 +1,7 @@
 {
   "name": "conversor-documentos",
   "productName": "Conversor de Documentos",
+  "desktopName": "conversor-documentos",
   "version": "1.0.0",
   "description": "Conversor de Documentos Inteligente - Procuradoria Geral do Estado (PGE)",
   "main": "electron/main.js",
@@ -82,7 +83,6 @@
       "icon": "assets/icon.png",
       "category": "Office",
       "maintainer": "PGE <ti@pge.pi.gov.br>",
-      "desktopName": "conversor-documentos",
       "artifactName": "Conversor-de-Documentos-${version}.${ext}"
     },
     "mac": {
