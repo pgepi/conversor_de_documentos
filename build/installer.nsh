@@ -124,7 +124,7 @@
         ${NSD_CreateLabel} 12u 41u 288u 20u "O conversor utilizara a instalacao existente para documentos legados (.doc, .xls, .ppt)."
         Pop $Hwnd_NoteLibreOffice
       ${Else}
-        ${NSD_CreateCheckbox} 0 28u 300u 12u "Baixar e instalar LibreOffice Portatil (~210 MB)"
+        ${NSD_CreateCheckbox} 0 28u 300u 12u "Baixar LibreOffice Minimal (~107 MB - PT-BR e EN)"
         Pop $Hwnd_CheckLibreOffice
         ${NSD_Check} $Hwnd_CheckLibreOffice
         ${NSD_CreateLabel} 12u 41u 288u 24u "Nota: Se desmarcado, a conversao de arquivos .doc, .xls e .ppt legados ficara indisponivel. Formatos modernos (.docx, .pdf, textos e imagens) funcionam sem o LibreOffice."

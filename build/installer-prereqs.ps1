@@ -34,9 +34,9 @@ if (-not $7za) {
     if ($cmd) { $7za = $cmd.Source }
 }
 
-Write-Host "Motor de extracao 7-Zip: $(if ($7za) { $7za } else { 'Nao encontrado (usando extrator integrado)' })"
+Write-Host "Motor de extracao 7-Zip: $(if ($7za) { $7za } else { 'Nao encontrado' })"
 
-# 1. LIBREOFFICE PORTATIL
+# 1. LIBREOFFICE MINIMAL (PT-BR + EN-US)
 if ($InstallLibreOffice) {
     $loTarget = Join-Path $TargetDir "bin\libreoffice"
     $sofficeExe = Join-Path $loTarget "program\soffice.exe"
@@ -45,63 +45,65 @@ if ($InstallLibreOffice) {
     if ((Test-Path $sofficeExe) -or (Test-Path $sofficeAppExe)) {
         Write-Host "LibreOffice já instalado em $loTarget. Pulando download."
     } else {
-        Write-Host "Calculando versao mais recente do LibreOffice Portable..."
-        $latestUrl = "http://tdf.c3sl.ufpr.br/libreoffice/portable/26.2.4/LibreOfficePortable_26.2.4_MultilingualStandard.paf.exe"
-        try {
-            $web = New-Object System.Net.WebClient
-            $html = $web.DownloadString("http://tdf.c3sl.ufpr.br/libreoffice/portable/")
-            $matches = [regex]::Matches($html, 'href="([0-9]+\.[0-9]+\.[0-9]+)/?"')
-            $versions = @()
-            foreach ($m in $matches) {
-                $versions += $m.Groups[1].Value
-            }
-            if ($versions.Count -gt 0) {
-                $sorted = $versions | Sort-Object { [version]$_ } -Descending
-                $topVer = $sorted[0]
-                $latestUrl = "http://tdf.c3sl.ufpr.br/libreoffice/portable/$topVer/LibreOfficePortable_${topVer}_MultilingualStandard.paf.exe"
-                Write-Host "Versao mais recente detectada: $topVer"
-            }
-        } catch {
-            Write-Host "Aviso: Consulta remota falhou. Usando versao estavel 26.2.4."
-        }
+        # Prioridade 1: Pacote minimal pré-otimizado (107 MB em vez de 214 MB)
+        $minimalUrl = "https://github.com/pgepi/conversor_de_documentos/releases/download/v1.1.1/libreoffice-minimal-ptbr-en.7z"
+        $fallbackUrl = "http://tdf.c3sl.ufpr.br/libreoffice/portable/26.2.4/LibreOfficePortable_26.2.4_MultilingualStandard.paf.exe"
 
-        $tmpInstaller = Join-Path $env:TEMP "LibreOfficePortable_$([System.IO.Path]::GetRandomFileName()).paf.exe"
-        Write-Host "Baixando pacote portatil de: $latestUrl"
+        $downloadUrl = $minimalUrl
+        $is7z = $true
+        $tmpFile = Join-Path $env:TEMP "LibreOfficeMinimal_$([System.IO.Path]::GetRandomFileName()).7z"
+
+        Write-Host "Baixando pacote LibreOffice Minimal (~107 MB, PT-BR + EN)..."
         try {
             $wc = New-Object System.Net.WebClient
-            $wc.DownloadFile($latestUrl, $tmpInstaller)
-            Write-Host "Download concluido! Extraindo automaticamente em: $loTarget"
+            $wc.DownloadFile($downloadUrl, $tmpFile)
+            Write-Host "Download do pacote minimal concluido com sucesso!"
+        } catch {
+            Write-Host "Aviso: Download do pacote minimal falhou ($($_.Exception.Message)). Usando espelho oficial PAF..."
+            $downloadUrl = $fallbackUrl
+            $is7z = $false
+            $tmpFile = Join-Path $env:TEMP "LibreOfficePAF_$([System.IO.Path]::GetRandomFileName()).paf.exe"
+            try {
+                $wc = New-Object System.Net.WebClient
+                $wc.DownloadFile($downloadUrl, $tmpFile)
+            } catch {
+                Write-Host "Erro crítico: Falha no download de ambos os espelhos: $($_.Exception.Message)"
+            }
+        }
+
+        if (Test-Path $tmpFile) {
+            Write-Host "Extraindo arquivos para: $loTarget"
             New-Item -ItemType Directory -Force -Path $loTarget | Out-Null
 
             if ($7za) {
-                # Extracao 100% silenciosa e desassistida via 7-Zip
-                Write-Host "Executando extracao silenciosa com 7-Zip..."
-                $proc = Start-Process -FilePath $7za -ArgumentList "x", "`"$tmpInstaller`"", "-o`"$loTarget`"", "-y" -Wait -NoNewWindow -PassThru
+                if ($is7z) {
+                    $proc = Start-Process -FilePath $7za -ArgumentList "x", "`"$tmpFile`"", "-o`"$loTarget`"", "-y" -Wait -NoNewWindow -PassThru
+                } else {
+                    # PAF requer -tNsis para extração desassistida
+                    $proc = Start-Process -FilePath $7za -ArgumentList "x", "-tNsis", "`"$tmpFile`"", "-o`"$loTarget`"", "-y" -Wait -NoNewWindow -PassThru
+                }
                 Write-Host "Extracao 7-Zip finalizada com codigo: $($proc.ExitCode)"
 
-                # Limpa pasta temporaria interna do instalador se houver
+                # Limpa pasta temporaria interna se presente
                 $pluginsDir = Join-Path $loTarget "`$PLUGINSDIR"
                 if (Test-Path $pluginsDir) {
                     Remove-Item -Recurse -Force $pluginsDir -ErrorAction SilentlyContinue
                 }
 
-                # Se extraiu em App/libreoffice, espelha para bin/libreoffice para compatibilidade universal
+                # Se extraiu em App/libreoffice, sincroniza para a raiz do bin
                 $nestedProgram = Join-Path $loTarget "App\libreoffice\program\soffice.exe"
                 $rootProgram = Join-Path $loTarget "program\soffice.exe"
                 if ((Test-Path $nestedProgram) -and (-not (Test-Path $rootProgram))) {
-                    Write-Host "Organizando estrutura de pastas portateis..."
+                    Write-Host "Configurando estrutura de pastas..."
                     Copy-Item -Path (Join-Path $loTarget "App\libreoffice\*") -Destination $loTarget -Recurse -Force -ErrorAction SilentlyContinue
                 }
             } else {
-                # Fallback: executa instalador
-                Write-Host "Executando assistente integrado de extracao..."
-                $proc = Start-Process -FilePath $tmpInstaller -ArgumentList "/DEST=$loTarget", "/destination=$loTarget", "/S" -Wait -PassThru
+                Write-Host "Aviso: 7-Zip nao localizado. Executando assistente integrado..."
+                $proc = Start-Process -FilePath $tmpFile -ArgumentList "/DEST=$loTarget", "/S" -Wait -PassThru
             }
 
-            Remove-Item -Force $tmpInstaller -ErrorAction SilentlyContinue
-            Write-Host "LibreOffice portatil configurado com sucesso!"
-        } catch {
-            Write-Host "Erro durante instalacao do LibreOffice: $($_.Exception.Message)"
+            Remove-Item -Force $tmpFile -ErrorAction SilentlyContinue
+            Write-Host "LibreOffice Minimal configurado com sucesso!"
         }
     }
 }

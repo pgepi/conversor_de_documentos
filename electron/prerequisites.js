@@ -432,11 +432,12 @@ class PrerequisitesManager {
     onLog('info', `Diretório de destino portátil: ${targetDir}`);
 
     if (this.platform === 'win32') {
-      onLog('info', 'Calculando link para a versão mais recente do LibreOffice Portable...');
-      const downloadUrl = await this.getLatestLibreOfficePortableUrl(onLog);
+      const minimalUrl = 'https://github.com/pgepi/conversor_de_documentos/releases/download/v1.1.1/libreoffice-minimal-ptbr-en.7z';
+      let downloadUrl = minimalUrl;
+      let is7z = true;
+      let tempInstaller = path.join(os.tmpdir(), `LibreOfficeMinimal_${Date.now()}.7z`);
 
-      const tempInstaller = path.join(os.tmpdir(), `LibreOfficePortable_${Date.now()}.paf.exe`);
-      onLog('info', `Baixando instalador portátil (100% isolado, sem tocar no sistema)...`);
+      onLog('info', 'Baixando pacote LibreOffice Minimal (~107 MB, PT-BR + EN)...');
       onLog('info', `Origem: ${downloadUrl}`);
 
       try {
